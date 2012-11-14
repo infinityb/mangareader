@@ -1,0 +1,74 @@
+<!DOCTYPE>
+<html>
+    <head>
+        <title></title>
+        <script type="text/javascript" src="res/js/curl.js"></script>
+        <script>
+            var _curl_opts = {
+                'baseUrl': 'res/js',
+                'paths': {
+                    'underscore': 'lodash'
+                }
+            };
+
+            curl(_curl_opts, [
+                'mreader/template/mainpage',
+                'mreader/rpc',
+                'mreader/reqtypes',
+                'yshi.template'
+            ], function(
+                template_mainpage,
+                rpc,
+                rt,
+                Template
+            ) {
+                var seleles = template_mainpage.render();
+                document.body.appendChild(seleles);
+                var msel = seleles.getElementsByClassName('manga')[0];
+                var chsel = seleles.getElementsByClassName('volch')[0];
+
+                var manga_option = new Template(function(manga) {
+                    var $ = this.tags;
+                    return $.option({'value': manga.dir},
+                        manga.name + ' [' + manga.scanlator + '][' + manga.language + ']');
+                });
+
+                var chapter_option = new Template(function(chapt) {
+                    var $ = this.tags;
+                    return $.option(
+                        {'value': chapt.get('ch')},
+                        'v' + chapt.get('volume') + '. ' + 
+                        'ch' +  chapt.get('ch').toString() + ' ' +
+                            chapt.get('title') + ' [' + chapt.get('scanlator') + ']')
+                });
+
+                var manga_sel_func = function(evt) {
+                    rpc.call(new rt.MangaData(evt.target.value)).then(function(resp2) {
+                        var chapter;
+                        var chapters = resp2.getChapters();
+                        chsel.innerHTML = '';
+                        for (var i = 0; i < chapters.length; i++) {
+                            chapter = chapters[i];
+                            chsel.appendChild(chapter_option.render(chapter));
+                        }
+                        chsel.onchange = function(evt) {
+                            console.log(evt);
+                        }
+                    });
+                };
+
+                rpc.call(new rt.RootList()).then(function(resp) {
+                    var mangay = resp.get_data()['manga'];
+                    msel.appendChild(document.createElement('option'));
+                    for (var i = 0; i < mangay.length; i++) {
+                        var manga = mangay[i];
+                        msel.appendChild(manga_option.render(manga));
+                    }
+                    msel.onchange = manga_sel_func;
+                });
+            });
+        </script>
+    </head>
+    <body>
+    </body>
+</html>

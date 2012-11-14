@@ -1,0 +1,15 @@
+[submodule "ext/yshi.js"]
+	path = ext/yshi.js
+	url = git://github.com/infinityb/yshi.js.git
+[submodule "ext/curl"]
+	path = ext/curl
+	url = git://github.com/cujojs/curl.git
+[submodule "ext/deferred-js"]
+	path = ext/deferred-js
+	url = git://github.com/infinityb/deferred-js.git
+[submodule "ext/underscore"]
+	path = ext/underscore
+	url = git://github.com/amdjs/underscore.git
+[submodule "ext/lodash"]
+	path = ext/lodash
+	url = git://github.com/bestiejs/lodash.git
