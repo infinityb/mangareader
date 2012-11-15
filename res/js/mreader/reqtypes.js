@@ -34,6 +34,12 @@ define([
             Class.fake_super(Response, this, 'constructor')(data);
         });
 
+        Response.prototype.getManga = function() {
+            return _.map(this._data.manga, function(manga) {
+                return manga;
+            });
+        };
+
         var Request = Class.create(BaseReq, function() {
             //
         });
@@ -50,27 +56,9 @@ define([
         var Response = Class.create(BaseResp, function(data) {
             Class.fake_super(Response, this, 'constructor')(data);
         });
-        Response.invert_volume_dict = function(vol_dict) {
-            var out = {};
-            _.each(_.pairs(vol_dict), function(stuff) {
-                var volno = stuff[0], chapters = stuff[1];
-                _.each(chapters, function(chno) {
-                    out[chno] = parseInt(volno);
-                });
-            });
-            return out;
-        };
 
-        Response.prototype.getChapters = function() {
-            var out = [];
-            var chapter;
-            var ch_to_vol = Response.invert_volume_dict(this._data.volumes);
-            for (var i = 0; i < this._data.chapters.length; i++) {
-                chapter = _.clone(this._data.chapters[i]);
-                chapter['volume'] = ch_to_vol[chapter.ch];
-                out.push(new Models.MangaChapter(chapter));
-            }
-            return out;
+        Response.prototype.getManga = function() {
+            return new Models.Manga(this._data);
         };
 
         var Request = Class.create(BaseReq, function(dir_name) {

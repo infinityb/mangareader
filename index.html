@@ -13,62 +13,62 @@
 
             curl(_curl_opts, [
                 'mreader/template/mainpage',
+                'mreader/controller/page_selector',
                 'mreader/rpc',
                 'mreader/reqtypes',
                 'yshi.template'
             ], function(
                 template_mainpage,
+                PageSelector,
                 rpc,
                 rt,
                 Template
             ) {
-                var seleles = template_mainpage.render();
-                document.body.appendChild(seleles);
-                var msel = seleles.getElementsByClassName('manga')[0];
-                var chsel = seleles.getElementsByClassName('volch')[0];
+                var initial_hash = window.location.hash;
+                var page_selector = new PageSelector();
+                window.page_selector = page_selector;
 
-                var manga_option = new Template(function(manga) {
-                    var $ = this.tags;
-                    return $.option({'value': manga.dir},
-                        manga.name + ' [' + manga.scanlator + '][' + manga.language + ']');
+                var ctrl_inspt = document.getElementsByClassName('control')[0];
+                var cont_inspt = document.getElementsByClassName('content')[0];
+
+                ctrl_inspt.appendChild(page_selector._root);
+                page_selector.addEventListener('change', function(evt) {
+                    console.dir(evt.cursor.toString(), evt.cursor);
+                    var cursor = evt.cursor;
+                    window.__cursor = cursor;
+                    window.location.hash = cursor.toUrlHash();
+
+                    var img = document.createElement('img')
+                    img.onload = function() {
+                        cont_inspt.innerHTML = '';
+                        cont_inspt.appendChild(img);
+
+                    };
+                    img.src = 'data/' + cursor.getPage().image_url;
+                    img.onclick = function() {
+                        evt.target.setCursor(evt.cursor.nextCursor());
+                    };
                 });
 
-                var chapter_option = new Template(function(chapt) {
-                    var $ = this.tags;
-                    return $.option(
-                        {'value': chapt.get('ch')},
-                        'v' + chapt.get('volume') + '. ' + 
-                        'ch' +  chapt.get('ch').toString() + ' ' +
-                            chapt.get('title') + ' [' + chapt.get('scanlator') + ']')
-                });
+                page_selector.ready_deferred.then(function() {
+                    try {
 
-                var manga_sel_func = function(evt) {
-                    rpc.call(new rt.MangaData(evt.target.value)).then(function(resp2) {
-                        var chapter;
-                        var chapters = resp2.getChapters();
-                        chsel.innerHTML = '';
-                        for (var i = 0; i < chapters.length; i++) {
-                            chapter = chapters[i];
-                            chsel.appendChild(chapter_option.render(chapter));
+                        var stuff = initial_hash.slice(1).split(',');
+                        if (stuff.length === 3) {
+                            var chap_idx = parseInt(stuff[1]);
+                            var page_idx = parseInt(stuff[2]);
+                            page_selector.goToPage(stuff[0], chap_idx, page_idx);
+                            console.log("applied");
                         }
-                        chsel.onchange = function(evt) {
-                            console.log(evt);
-                        }
-                    });
-                };
-
-                rpc.call(new rt.RootList()).then(function(resp) {
-                    var mangay = resp.get_data()['manga'];
-                    msel.appendChild(document.createElement('option'));
-                    for (var i = 0; i < mangay.length; i++) {
-                        var manga = mangay[i];
-                        msel.appendChild(manga_option.render(manga));
+                    } catch (e) {
+                        console.log(e.stack);
                     }
-                    msel.onchange = manga_sel_func;
                 });
             });
         </script>
     </head>
     <body>
+        <div class="control"></div>
+        <div class="content"></div>
     </body>
 </html>

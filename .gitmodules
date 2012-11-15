@@ -13,3 +13,6 @@
 [submodule "ext/lodash"]
 	path = ext/lodash
 	url = git://github.com/bestiejs/lodash.git
+[submodule "ext/medikoo-deferred"]
+	path = ext/medikoo-deferred
+	url = git://github.com/medikoo/deferred.git
