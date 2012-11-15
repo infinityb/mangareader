@@ -1,1 +1,0 @@
-../../ext/yshi.js/YSHI.js/yshi.class.js

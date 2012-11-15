@@ -1,1 +1,0 @@
-../../ext/curl/dist/curl-with-js-and-domReady/curl.js
